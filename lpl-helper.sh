@@ -50,27 +50,27 @@ EOF
 done
 
 function clean_thumb_names {
-CHARS=""
-# Iterate over all files
-for file in ${DIR}/* ; do
+  CHARS=""
+  # Iterate over all files
+  for file in ${DIR}/* ; do
 
-  # Substring to remove leading directory
-  file=${file#${DIR}/}
+    # Substring to remove leading directory
+    file=${file#${DIR}/}
 
-  # Find png files
-  if $(grep -q ".png" <<<"${file}"); then
-    thumb="${file}"
-    # Check if the png filename contains an illegal character
-    for illegal_char in "${CHARS[@]}"; do
-      if grep -q "${illegal_char}" <<<"${thumb}"; then
+    # Find png files
+    if $(grep -q ".png" <<<"${file}"); then
+      thumb="${file}"
+      # Check if the png filename contains an illegal character
+      for illegal_char in "${CHARS[@]}"; do
+        if grep -q "${illegal_char}" <<<"${thumb}"; then
 
-      # Substring search/replace illegal character
-        thumb_clean="${thumb//${illegal_char}/_}"
-        echo "INFO: Illegal char ${illegal_char} found in $thumb"
-        echo "INFO: Renaming to: $thumb_clean"
-        mv "${DIR}/${thumb}" "${DIR}/${thumb_clean}"
-      fi
-    done
-  fi
-done
+        # Substring search/replace illegal character
+          thumb_clean="${thumb//${illegal_char}/_}"
+          echo "INFO: Illegal char ${illegal_char} found in $thumb"
+          echo "INFO: Renaming to: $thumb_clean"
+          mv "${DIR}/${thumb}" "${DIR}/${thumb_clean}"
+        fi
+      done
+    fi
+  done
 }
