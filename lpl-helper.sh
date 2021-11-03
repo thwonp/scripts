@@ -53,7 +53,9 @@ EOF
 
 
 function clean_thumb_names {
-  CHARS=""
+  # Illegal characters for thumbnail names
+  CHARS=('&' '*' '/' ':' '`' '<' '>' '?' '\' '|')
+  
   # Iterate over all files
   for file in ${DIR}/* ; do
 
