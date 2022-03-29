@@ -89,7 +89,7 @@ function platform_select {
   fi
 }
 
-while getopts p:f:upsh flag; do
+while getopts p:o:tgch flag; do
   case "${flag}" in
     p | --platform            ) platform_select ${OPTARG}
                                 ;;
