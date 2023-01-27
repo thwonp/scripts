@@ -34,7 +34,7 @@ EOF
       rom_label="${file%.*}"
       cat <<EOF >> "${ODIR}/${playlist_name}.lpl"
     {
-      "path": "${ROM_PARENT_DIR}/${playlist_name}/${file}",
+      "path": "${ROM_PARENT_DIR}${PATH_SEPARATOR}${playlist_name}${PATH_SEPARATOR}${file}",
       "label": "${rom_label}",
       "core_path": "DETECT",
       "core_name": "DETECT",
@@ -82,8 +82,10 @@ function clean_thumb_names {
 function platform_select {
   if [[ "$1" -eq "vita" ]]; then
     ROM_PARENT_DIR="ux0:/data/retroarch/roms"
+    PATH_SEPARATOR="/"
   elsif [[ "$1" -eq "windows" ]]; then
     ROM_PARENT_DIR="C:\\RetroArch-Win64\\roms\\"
+    PATH_SEPARATOR="\\"
   else
     echo "Error: Please select a valid platform: windows or vita"
   fi
