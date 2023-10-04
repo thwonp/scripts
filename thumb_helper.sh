@@ -89,11 +89,13 @@ matchsearch
 # apt install ImageMagick
 ## Resize, max dimensions, preserve aspect ratio
 #  mogrify -resize 250x250\> *.png
-## Convert 
-# for file in */*/*.jpg; do convert "${file}" "${file/.jpg/.png}" ; done
-
 ## RG35XX GarlicOS Resize
-# for dir in *; do mogrify -resize 340x480 -extent 640x480 -gravity West -background none *.png
+# mogrify -resize 340x480 -extent 640x480 -gravity West -background none *.png
+## Miyoo Mini Resize
+#  mogrify -resize 250x360\> *.png
+## Convert 
+# convert "${file}" "${file/.jpg/.png}" ; done
+
 ### Patching ROMs 
 # ./flips-linux --apply darkhalf_patch.ips Dark\ Half.sfc patchedRom.sfc
 # xdelta3 -d -s rom.sfc patch.IPS patchedRom.sfc
