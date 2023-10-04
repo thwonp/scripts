@@ -83,11 +83,17 @@ function stripChar(){
 
 matchsearch
 
-# for file in * ; do if grep -v "USA" <<<"${file}"; then rm "${file}"; fi; done
-# for file in * ; do newname="${file/ \(USA*/.png}"; mv "${file}" "${newname}"; done
-# for file in * ; do newname="${file/ \(Euro*/.png}"; mv "${file}" "${newname}"; done
+### ImageMagick Commands
+## Install
+# yum install ImageMagick
+# apt install ImageMagick
+## Resize, max dimensions, preserve aspect ratio
+#  mogrify -resize 250x250\> *.png
+## Convert 
+# for file in */*/*.jpg; do convert "${file}" "${file/.jpg/.png}" ; done
 
-# sudo yum install ImageMagick
-# mogrify -resize 250x250\> *.png
+## RG35XX GarlicOS Resize
+# for dir in *; do mogrify -resize 340x480 -extent 640x480 -gravity West -background none *.png
+### Patching ROMs 
 # ./flips-linux --apply darkhalf_patch.ips Dark\ Half.sfc patchedRom.sfc
 # xdelta3 -d -s rom.sfc patch.IPS patchedRom.sfc
