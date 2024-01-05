@@ -30,38 +30,42 @@ xml_onion = False    # boxart only, 250px PNGs, miyoogamelist.xml
 # Choose platforms (comment/uncomment as needed)
 # The first string in each pair is the Launchbox platform filename, the second is the output platform folder name
 platforms = dict()
-# platforms["Atari 7800"] = "atari7800"
-# platforms["Arcade"] = "mame"
-# platforms["Microsoft Xbox 360"] = "xbox360"
+platforms["Atari Jaguar"] = "jaguar"
+platforms["Atari ST"] = "atarist"
+platforms["Commodore 64"] = "c64"
+platforms["Commodore Amiga"] = "amiga1200"
+platforms["Atari 7800"] = "atari7800"
+platforms["Arcade"] = "mame"
+platforms["Microsoft Xbox 360"] = "xbox360"
 platforms["Microsoft Xbox"] = "xbox"
-# platforms["NEC TurboGrafx-16"] = "pcengine"
-# platforms["NEC TurboGrafx-CD"] = "pcenginecd"
-# platforms["Nintendo 3DS"] = "3ds"
-# platforms["Nintendo 64"] = "n64"
-# platforms["Nintendo DS"] = "nds"
-# platforms["Nintendo Entertainment System"] = "nes"
-# platforms["Nintendo Game Boy Advance"] = "gba"
-# platforms["Nintendo Game Boy Color"] = "gbc"
-# platforms["Nintendo Game Boy"] = "gb"
-# platforms["Nintendo GameCube"] = "gamecube"
-# p# latforms["Nintendo Switch"] = "switch"
-# platforms["Nintendo Wii U"] = "wiiu"
-# platforms["Nintendo Wii"] = "wii"
-# platforms["Nintendo WiiWare"] = "wiiware"
-# platforms["Sega 32X"] = "sega32x"
-# platforms["Sega CD"] = "segacd"
-# platforms["Sega Dreamcast"] = "dreamcast"
-# platforms["Sega Game Gear"] = "gamegear"
-# platforms["Sega Genesis"] = "megadrive"
-# platforms["Sega Master System"] = "mastersystem"
-# platforms["Sega Saturn"] = "saturn"
-# platforms["SNK Neo Geo AES"] = "neogeo"
-# platforms["Sony Playstation 2"] = "ps2"
-# platforms["Sony Playstation 3"] = "ps3"
-# platforms["Sony Playstation Vita"] = "vita"
-# platforms["Sony Playstation"] = "psx"
-# platforms["Super Nintendo Entertainment System"] = "snes"
-# platforms["Sony PSP"] = "psp"
+platforms["NEC TurboGrafx-16"] = "pcengine"
+platforms["NEC TurboGrafx-CD"] = "pcenginecd"
+platforms["Nintendo 3DS"] = "3ds"
+platforms["Nintendo 64"] = "n64"
+platforms["Nintendo DS"] = "nds"
+platforms["Nintendo Entertainment System"] = "nes"
+platforms["Nintendo Game Boy Advance"] = "gba"
+platforms["Nintendo Game Boy Color"] = "gbc"
+platforms["Nintendo Game Boy"] = "gb"
+platforms["Nintendo GameCube"] = "gamecube"
+platforms["Nintendo Switch"] = "switch"
+platforms["Nintendo Wii U"] = "wiiu"
+platforms["Nintendo Wii"] = "wii"
+platforms["Nintendo WiiWare"] = "wiiware"
+platforms["Sega 32X"] = "sega32x"
+platforms["Sega CD"] = "segacd"
+platforms["Sega Dreamcast"] = "dreamcast"
+platforms["Sega Game Gear"] = "gamegear"
+platforms["Sega Genesis"] = "megadrive"
+platforms["Sega Master System"] = "mastersystem"
+platforms["Sega Saturn"] = "saturn"
+platforms["SNK Neo Geo AES"] = "neogeo"
+platforms["Sony Playstation 2"] = "ps2"
+platforms["Sony Playstation 3"] = "ps3"
+platforms["Sony Playstation Vita"] = "vita"
+platforms["Sony Playstation"] = "psx"
+platforms["Super Nintendo Entertainment System"] = "snes"
+platforms["Sony PSP"] = "psp"
 
 
 ### edits should not be required below here ###
@@ -84,6 +88,7 @@ for platform in platforms.keys():
     lb_wheel_dir = r'%s\images\%s\Clear Logo' % (lb_dir, platform_lb)
     lb_3dbox_dir = r'%s\images\%s\Box - 3D' % (lb_dir, platform_lb)
     lb_screenshot_dir = r'%s\images\%s\Screenshot - Gameplay' % (lb_dir, platform_lb)
+    lb_manual_dir = r'%s\manuals\%s' % (lb_dir, platform_lb)
     lb_video_dir = r'%s\videos\%s' % (lb_dir, platform_lb)
     output_roms = r'%s\roms' % output_dir
     output_roms_platform = r'%s\%s' % (output_roms, platform_rp)
@@ -108,11 +113,13 @@ for platform in platforms.keys():
     images_screenshots = []
     videos = []
     images = []
-    
+    manuals = []
+
     if xml_batocera:
         image_maps = [{"type": "screenshot", "xmltag": "image", "output_dir": "images_screenshot", "lb_media_dir": lb_screenshot_dir, "lb_media_files": images_screenshots},
                       {"type": "marquee", "xmltag": "marquee", "output_dir": "images_marquee", "lb_media_dir": lb_wheel_dir, "lb_media_files": images_marquee},
                       {"type": "box art", "xmltag": "thumbnail", "output_dir": "images_boxart", "lb_media_dir": lb_image_dir, "lb_media_files": images},
+                      {"type": "manual", "xmltag": "manual", "output_dir": "manuals", "lb_media_dir": lb_manual_dir, "lb_media_files": manuals},
                       {"type": "video", "xmltag": "video", "output_dir": "video", "lb_media_dir": lb_video_dir, "lb_media_files": videos}
                       ]
     elif xml_retropie:
@@ -183,7 +190,7 @@ for platform in platforms.keys():
         try:
             favorite_element = game.find("Favorite")
             if (favorites_only == False) or (favorites_only == True and favorite_element is not None and favorite_element.text == 'true'):                                
-                print("%s: %s" % (platform_lb, game.find("Title").text))                
+                # print("%s: %s" % (platform_lb, game.find("Title").text))                
                 rom_path = game.find("ApplicationPath").text        
                 this_game["path"]="./" + os.path.basename(r'%s' % game.find("ApplicationPath").text)
                 this_game["name"]=game.find("Title").text
@@ -210,11 +217,16 @@ for platform in platforms.keys():
                     this_game["publisher"]=game.find("Publisher").text
                 if not game.find("Genre") is None:
                     this_game["genre"]=game.find("Genre").text
-                this_game["players"]="1+"
+                if not game.find("MaxPlayers") is None:
+                    if game.find("MaxPlayers").text.startswith('0'):
+                        this_game["players"]="1+"
+                    else:      
+                        this_game["players"]=game.find("MaxPlayers").text
+                # this_game["players"]="1+"
                 games_found.append(this_game)                
                 # copy(rom_path, output_roms_platform)
                 # copy(os.path.join(lb_dir,rom_path), output_roms_platform)
-                processed_games += 1            
+                processed_games += 1           
         except Exception as e:            
             print(e)
             
