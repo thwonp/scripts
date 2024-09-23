@@ -10,7 +10,7 @@ import sys
 # version 2.0
 # This script is a heavy modification of a script on the LaunchBox forums:
 # https://forums.launchbox-app.com/files/file/860-launchbox-retropie-batocera-miyoo-export/
-# I added Manuals to the media map, and added functionality to rename all media to match the ROM names for use on various platforms
+# I added Manuals to the media map, added multiple platforms, and added functionality to rename all media to match the ROM names for use on various platforms, along with some general refactoring.
 
 # The path to your Launchbox folder.
 lb_dir = r'R:\Games\LaunchBox'
