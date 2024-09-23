@@ -14,12 +14,17 @@ lb_dir = r'R:\Games\LaunchBox'
 # Where to put the exported roms, images and xmls
 # Copy the gamelist, roms and images to /home/<user>/RetroPie/roms. Gamelists are now saved inside each platform dir. 
 output_dir = r'R:\Launchbox-Export'
+rename_parent_dir = r'R:\Launchbox-Export-Rename'
+gamelist_dir = f'{output_dir}{'\\'}{'roms'}'
 
 # Restrict export to only Launchbox Favorites
-favorites_only=False
+favorites_only = False
 
 # Retropie running on an old Pi needs small images. Images with a height or width above 500 pixels will be reduced with their aspect ratio preserved. If generating for Onion OS the images will be 250 px. 
 reduce_image_size = False
+
+copy_roms = False
+copy_media = True
 
 # Choose *one* xml format. 
 # Batocera supports more metadata types and tags, Retropie xml just supports one image type per game. 
@@ -30,45 +35,74 @@ xml_onion = False    # boxart only, 250px PNGs, miyoogamelist.xml
 # Choose platforms (comment/uncomment as needed)
 # The first string in each pair is the Launchbox platform filename, the second is the output platform folder name
 platforms = dict()
-platforms["Atari Jaguar"] = "jaguar"
-platforms["Atari ST"] = "atarist"
-platforms["Commodore 64"] = "c64"
-platforms["Commodore Amiga"] = "amiga1200"
-platforms["Atari 7800"] = "atari7800"
-platforms["Arcade"] = "mame"
-platforms["Microsoft Xbox 360"] = "xbox360"
-platforms["Microsoft Xbox"] = "xbox"
-platforms["NEC TurboGrafx-16"] = "pcengine"
-platforms["NEC TurboGrafx-CD"] = "pcenginecd"
-platforms["Nintendo 3DS"] = "3ds"
-platforms["Nintendo 64"] = "n64"
-platforms["Nintendo DS"] = "nds"
-platforms["Nintendo Entertainment System"] = "nes"
-platforms["Nintendo Game Boy Advance"] = "gba"
-platforms["Nintendo Game Boy Color"] = "gbc"
+# platforms["3DO Interactive Multiplayer"] = "3do"
+# platforms["Arcade"] = "mame"
+# platforms["Arcade - FBNeo"] = "fbneo"
+# platforms["Atari 2600"] = "atari2600"
+# platforms["Atari 7800"] = "atari7800"
+# platforms["Atari Jaguar"] = "jaguar"
+# platforms["Atari Lynx"] = "lynx"
+# platforms["ColecoVision"] = "colecovision"
+# platforms["Commodore 64"] = "c64"
+# platforms["Commodore Amiga 500"] = "amiga500"
+# platforms["Commodore Amiga 1200"] = "amiga1200"
+# platforms["Commodore Amiga CD32"] = "amigacd32"
+# platforms["Daphne"] = "daphne"
+# platforms["GCE Vectrex"] = "vectrex"
+# platforms["Mattel Intellivision"] = "intellivision"
+# platforms["Magnavox Odyssey 2"] = "o2em"
+# platforms["Microsoft MSX2"] = "msx2"
+# platforms["Microsoft Xbox"] = "xbox"
+# platforms["Moonlight"] = "moonlight"
+# platforms["NEC TurboGrafx-16"] = "pcengine"
+# platforms["NEC TurboGrafx-CD"] = "pcenginecd"
+# platforms["Nintendo 3DS"] = "3ds"
+# platforms["Nintendo 64"] = "n64"
+# platforms["Nintendo DS"] = "nds"
+# platforms["Nintendo Entertainment System"] = "nes"
+# platforms["Nintendo Famicom Disk System"] = "fds"
+# platforms["Nintendo Game Boy Advance"] = "gba"
+# platforms["Nintendo Game Boy Color"] = "gbc"
 platforms["Nintendo Game Boy"] = "gb"
-platforms["Nintendo GameCube"] = "gamecube"
-platforms["Nintendo Switch"] = "switch"
-platforms["Nintendo Wii U"] = "wiiu"
-platforms["Nintendo Wii"] = "wii"
-platforms["Nintendo WiiWare"] = "wiiware"
-platforms["Sega 32X"] = "sega32x"
-platforms["Sega CD"] = "segacd"
-platforms["Sega Dreamcast"] = "dreamcast"
-platforms["Sega Game Gear"] = "gamegear"
-platforms["Sega Genesis"] = "megadrive"
-platforms["Sega Master System"] = "mastersystem"
-platforms["Sega Saturn"] = "saturn"
-platforms["SNK Neo Geo AES"] = "neogeo"
-platforms["Sony Playstation 2"] = "ps2"
-platforms["Sony Playstation 3"] = "ps3"
-platforms["Sony Playstation Vita"] = "vita"
-platforms["Sony Playstation"] = "psx"
-platforms["Super Nintendo Entertainment System"] = "snes"
-platforms["Sony PSP"] = "psp"
-
+# platforms["Nintendo GameCube"] = "gamecube"
+# platforms["Nintendo MSU-1"] = "snes-msu1"
+# platforms["Nintendo Satellaview"] = "satellaview"
+# platforms["Nintendo Switch"] = "switch"
+# platforms["Nintendo Virtual Boy"] = "virtualboy"
+# platforms["Nintendo Wii U"] = "wiiu"
+# platforms["Nintendo Wii"] = "wii"
+# platforms["Philips CD-i"] = "cdi"
+# platforms["PICO-8"] = "pico8"
+# platforms["Sammy Atomiswave"] = "atomiswave"
+# platforms["Sega 32X"] = "sega32x"
+# platforms["Sega CD"] = "segacd"
+# platforms["Sega Dreamcast"] = "dreamcast"
+# platforms["Sega Game Gear"] = "gamegear"
+# platforms["Sega Genesis"] = "megadrive"
+# platforms["Sega Master System"] = "mastersystem"
+# platforms["Sega MSU-MD"] = "msu-md"
+# platforms["Sega Model 3"] = "model3"
+# platforms["Sega Naomi"] = "naomi"
+# platforms["Sega Naomi 2"] = "naomi2"
+# platforms["Sega Saturn"] = "saturn"
+# platforms["Sega SG-1000"] = "sg1000"
+# platforms["Sharp X68000"] = "x68000"
+# platforms["Sinclair ZX Spectrum"] = "zxspectrum"
+# platforms["SNK Neo Geo AES"] = "neogeo"
+# platforms["SNK Neo Geo CD"] = "neogeocd"
+# platforms["SNK Neo Geo Pocket Color"] = "ngpc"
+# platforms["Sony Playstation"] = "psx"
+# platforms["Sony Playstation 2"] = "ps2"
+# platforms["Sony Playstation 3"] = "ps3"
+# platforms["Sony Playstation Vita"] = "vita"
+# platforms["Sony PSP"] = "psp"
+# platforms["Super Nintendo Entertainment System"] = "snes"
+# platforms["Windows"] = "steam"
+# platforms["WonderSwan"] = "wswan"
+# platforms["WonderSwan Color"] = "wswanc"
 
 ### edits should not be required below here ###
+
 if sum([xml_retropie, xml_batocera, xml_onion]) > 1:
     print("Choose only a single xml format")
     sys.exit(-1)
@@ -139,6 +173,7 @@ for platform in platforms.keys():
         game_name = game_name.replace("'","_")
         game_name = game_name.replace("/","_")
         game_name = game_name.replace("*","_")
+        game_name = game_name.replace("?","_")
         for image_path in image_files:
             image_name = os.path.basename(r'%s' % image_path)
             if image_name.startswith(game_name + '-0') or image_name.startswith(game_name + '.') or image_name.lower() == game_name.lower() + '.mp4':
@@ -182,8 +217,9 @@ for platform in platforms.keys():
                 print(e)
         else:  
             filename = os.path.basename(r'%s' % original_path)
-            output_path = os.path.join(output_dir, filename)          
-            copy(r'%s' % original_path, r'%s' % output_dir)
+            output_path = os.path.join(output_dir, filename)     
+            if (copy_media == True):      
+                copy(r'%s' % original_path, r'%s' % output_dir)
         return os.path.basename(output_path)    
     for game in xmltree.getroot().iter("Game"):        
         this_game = dict()
@@ -222,10 +258,12 @@ for platform in platforms.keys():
                         this_game["players"]="1+"
                     else:      
                         this_game["players"]=game.find("MaxPlayers").text
-                # this_game["players"]="1+"
-                games_found.append(this_game)                
-                # copy(rom_path, output_roms_platform)
-                # copy(os.path.join(lb_dir,rom_path), output_roms_platform)
+                games_found.append(this_game)
+
+                if (copy_roms == True): 
+                    copy(rom_path, output_roms_platform)
+                    copy(os.path.join(lb_dir,rom_path), output_roms_platform)
+
                 processed_games += 1           
         except Exception as e:            
             print(e)
@@ -254,4 +292,122 @@ for platform in platforms.keys():
 print('----------------------------------------------------------------------')
 print(f'Created {processed_platforms :,} gamelist XMLs and copied {media_copied :,} media files from {processed_games :,} games')
 print('----------------------------------------------------------------------')
+
+print('----------------------------------------------------------------------')
+print(f'Starting rename function')
+print('----------------------------------------------------------------------')
         
+# Dictionary of media tags to search in the gamelist.xml / their destination output subfolder  
+media_tags = {
+    'image' : 'screenshots',
+    'marquee' : 'marquees',
+    'thumbnail' : 'covers',
+    'manual' : 'manuals',
+    'video' : 'videos'
+} 
+
+def create_missing_dir(dir):
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+
+def parse_xml(platform):
+    xmlfile = f'{gamelist_dir}{'\\'}{platform}{'\\'}{'gamelist.xml'}'
+    if not os.path.exists(xmlfile):
+        print("Error: Could not find a gamelist.xml file for ", platform)
+        sys.exit(-1)
+    xmltree = ET.parse(xmlfile)
+    root = xmltree.getroot()
+
+    # Iterate over each <game> in the XML file
+    for game in root.iter('game'):
+        # Access the <path> element for the ROM filename
+        filename = game.find('path').text
+        # Remove trailing file extension and leading './'
+        basename = os.path.splitext(filename)[0].replace('./', '')
+
+        # For each game, iterate over the dictionary of media types
+        for media in media_tags.keys():
+            # Try to access the XML tag value for each media type, skip any missing elements
+            media_input_filename=game.find(media).text
+            if media_input_filename is not None:
+                # Create output subdirectory for this media type
+                media_dir = f'{output_platform_dir}{'\\'}{media_tags[media]}'
+                create_missing_dir(media_dir)
+                # typecast to string and remove leading './'
+                media_filename_trimmed = str(media_input_filename).replace('./', '').replace('/', '\\')
+                # media_basename = os.path.splitext(media_filename_trimmed)[0].split('\\')[-1]
+                extension = os.path.splitext(media_filename_trimmed)[1]
+                input_filepath = f'{gamelist_dir}{'\\'}{platform}{'\\'}{media_filename_trimmed}'
+                new_filename = f'{media_dir}{'\\'}{basename}{extension}'
+                # print("DEBUG: Game Title: ", basename)
+                # print("DEBUG: Old Filename: ", input_filepath)
+                # print("DEBUG: New Filename: ", new_filename)
+                copy(input_filepath, new_filename)
+            else: 
+                print("INFO: No ", media, " XML entry found for ", basename)
+
+# Create the parent output directory if missing
+create_missing_dir(rename_parent_dir)
+
+# Iterate through each platform under input_roms_dir
+for platform in os.listdir(gamelist_dir):
+    # Create subdirectory for the platform
+    output_platform_dir = f'{rename_parent_dir}{'\\'}{platform}'
+    create_missing_dir(output_platform_dir)
+    # Begin parsing the xml
+    print("Copying renamed media for: ", platform)
+    parse_xml(platform)
+
+print('----------------------------------------------------------------------')
+print(f'Fixing XML gamelists')
+print('----------------------------------------------------------------------')
+
+# Dictionary of media tags to search in the gamelist.xml
+media_tags = {
+    'image' : 'screenshots',
+    'marquee' : 'marquees',
+    'thumbnail' : 'covers',
+    'manual' : 'manuals',
+    'video' : 'videos'
+} 
+
+def parse_xml(platform):
+    xmlfile = f'{gamelist_dir}{'\\'}{platform}{'\\'}{'gamelist.xml'}'
+    if not os.path.exists(xmlfile):
+        print("Error: Could not find a gamelist.xml file for ", platform)
+        sys.exit(-1)
+    xmltree = ET.parse(xmlfile)
+    root = xmltree.getroot()
+
+    # Iterate over each <game> in the XML file
+    for game in root.iter('game'):
+        # Access the <path> element for the ROM filename
+        filename = game.find('path').text
+        # Remove trailing file extension and leading './'
+        basename = os.path.splitext(filename)[0].replace('./', '')
+
+        # For each game, iterate over the dictionary of media types
+        for media in media_tags.keys():
+            # Try to access the XML tag value for each media type, skip any missing elements
+            media_element_orig=game.find(media)
+            media_element=game.find(media).text
+            print(media_element)
+            if media_element is not None:
+                extension = os.path.splitext(media_element)[1]
+                print("TEST: FOUND", media_element)
+                new_element = str('./' + media_tags[media] + '/' + basename + extension)
+                media_element_orig.text = new_element
+                
+            else: 
+                print("INFO: No ", media, " XML entry found for ", basename)
+    xmlfile = f'{rename_parent_dir}{'\\'}{platform}{'\\'}{'gamelist.xml'}'
+    xmltree.write(xmlfile)
+    # copy(xmlfile, os.path.join(rename_parent_dir, platform, xmlfile))
+        
+
+# Iterate through each platform under input_roms_dir
+for platform in os.listdir(gamelist_dir):
+    # Create subdirectory for the platform
+    # Begin parsing the xml
+    print("Parsing: ", platform)
+    parse_xml(platform)
