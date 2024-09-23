@@ -7,7 +7,10 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import sys
 
-# version 1.2.0
+# version 2.0
+# This script is a heavy modification of a script on the LaunchBox forums:
+# https://forums.launchbox-app.com/files/file/860-launchbox-retropie-batocera-miyoo-export/
+# I added Manuals to the media map, and added functionality to rename all media to match the ROM names for use on various platforms
 # The path to your Launchbox folder.
 lb_dir = r'R:\Games\LaunchBox'
 
@@ -29,7 +32,7 @@ copy_media = True
 # Choose *one* xml format. 
 # Batocera supports more metadata types and tags, Retropie xml just supports one image type per game. 
 xml_retropie = False     # boxart
-xml_batocera = True    # boxart, marquee, screenshots and videos
+xml_batocera = True    # boxart, marquee, screenshots, videos, and manuals
 xml_onion = False    # boxart only, 250px PNGs, miyoogamelist.xml
 
 # Choose platforms (comment/uncomment as needed)
