@@ -75,10 +75,10 @@ platforms["Nintendo Game Boy"] = "gb"
 # platforms["Nintendo Virtual Boy"] = "virtualboy"
 # platforms["Nintendo Wii U"] = "wiiu"
 # platforms["Nintendo Wii"] = "wii"
-# platforms["Philips CD-i"] = "cdi"
+platforms["Philips CD-i"] = "cdi"
 # platforms["PICO-8"] = "pico8"
 # platforms["Sammy Atomiswave"] = "atomiswave"
-# platforms["Sega 32X"] = "sega32x"
+platforms["Sega 32X"] = "sega32x"
 # platforms["Sega CD"] = "segacd"
 # platforms["Sega Dreamcast"] = "dreamcast"
 # platforms["Sega Game Gear"] = "gamegear"
@@ -347,8 +347,8 @@ def parse_xml(platform):
                 # print("DEBUG: Old Filename: ", input_filepath)
                 # print("DEBUG: New Filename: ", new_filename)
                 copy(input_filepath, new_filename)
-            else: 
-                print("INFO: No ", media, " XML entry found for ", basename)
+            # else: 
+            #     print("INFO: No ", media, " XML entry found for ", basename)
 
 # Create the parent output directory if missing
 create_missing_dir(rename_parent_dir)
@@ -395,15 +395,15 @@ def parse_xml(platform):
             # Try to access the XML tag value for each media type, skip any missing elements
             media_element_orig=game.find(media)
             media_element=game.find(media).text
-            print(media_element)
+           # print(media_element)
             if media_element is not None:
                 extension = os.path.splitext(media_element)[1]
-                print("TEST: FOUND", media_element)
+                # print("TEST: FOUND", media_element)
                 new_element = str('./' + media_tags[media] + '/' + basename + extension)
                 media_element_orig.text = new_element
                 
-            else: 
-                print("INFO: No ", media, " XML entry found for ", basename)
+            # else: 
+            #     print("INFO: No ", media, " XML entry found for ", basename)
     xmlfile = f'{rename_parent_dir}{'\\'}{platform}{'\\'}{'gamelist.xml'}'
     xmltree.write(xmlfile)
     # copy(xmlfile, os.path.join(rename_parent_dir, platform, xmlfile))
