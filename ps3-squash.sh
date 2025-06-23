@@ -1,6 +1,6 @@
 for file in *.iso; do
 	name=$(basename "${file}")
-	mount -o loop "${name}" tmpmnt/
+	mkdir -p tmpmnt && mount -o loop "${name}" tmpmnt/
 	mkdir "${name/iso/ps3}"
 	echo "Copying data for ${name/.iso/}"
 	cp -rv tmpmnt/* "${name/iso/ps3}"/
