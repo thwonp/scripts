@@ -5,7 +5,7 @@ for file in *.iso; do
 	echo "Copying data for ${name/.iso/}"
 	cp -rv tmpmnt/* "${name/iso/ps3}"/
 	echo "Unmounting..."
-	umount "${name}"
+	umount "${name}" && rm -rf tmpmnt
 	echo "Squashing ${name/iso/}.."
 	mksquashfs "${name/iso/ps3}" "${name/iso/ps3.squashfs}" -comp xz
 	echo "Cleaning up..."
