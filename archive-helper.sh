@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# archive-helper.sh — Combine every .zip in a folder into a single .7z.
+# archive-helper.sh — Unzip, merge, and repack files for archival using 7zip.
 #
 # For each *.zip in <directory>: single-file zips are extracted (so the
 # raw file goes into the archive), while multi-file zips are added as-is
