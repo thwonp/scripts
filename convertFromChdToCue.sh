@@ -1,11 +1,14 @@
 #!/bin/bash
+#
+# Bulk-converts .chd disc images back to .cue/.bin pairs using chdman.
+# Recurses into subdirectories from the current working directory.
+# Use when migrating a CHD-based library back to raw CUE/BIN (e.g. for
+# emulators or tools that don't support CHD).
 
-# Grab .chd file
-for f in ./**/*.chd
-do
-	name=${f%.chd} # Remove '.chd' from file name
-	chdman extractcd -i "$name.chd" -o "$name.cue" --force
+set -euo pipefail
+shopt -s globstar nullglob
+
+for f in ./**/*.chd; do
+    name="${f%.chd}"
+    chdman extractcd -i "$name.chd" -o "$name.cue" --force
 done
-
-
-for file in *.chd; do chdman extractcd -i "${file}" -o "${file%.chd}.cue" --force

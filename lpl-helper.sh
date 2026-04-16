@@ -1,117 +1,139 @@
 #!/bin/bash
+#
+# RetroArch playlist helper.
+#
+#   -g  Mirror a ROM tree (rom_dir/<system>/<files>) into one .lpl per
+#       subdirectory. Each entry's path is rewritten for the target
+#       device (-p vita|windows|android|linux); label is the filename
+#       without its extension; core_path/core_name/crc32 are "DETECT" for
+#       RetroArch to resolve at scan/launch. No hashing or DB lookup
+#       is performed here, so subdirectory names must match RetroArch's
+#       expected system names for DETECT to match a core.
+#
+#   -c  Replace filesystem-illegal characters (& * / : ` < > ? \ |) in
+#       thumbnail PNG filenames with underscores.
+#
+# Requires: jq.
 
-# A script for generating Retroach playlist files and cleaning illegal characters from thumbnails.
+set -euo pipefail
 
-IFS=$'\n'
+SCRIPT="${0##*/}"
 
-function usage {
-  echo 'usage: '"${SCRIPT}"' [-p|platform] [-o|output_dir] [-t|thumbnail_dir] [-g|generate_lpls] [-c|clean_thumbs] [-h|help]'
-  echo '  -p [platform]      "vita" or "windows" : Sets rom location path in the systems format'
-  echo '  -o [output_dir]    Output directory for lpl playlist files'
-  echo '  -t [thumbnail_dir] Input directory where thumbnail files are stored to target for cleaning'
-  echo '  -g [generate_lpls] Trigger lpl generation. Requires options "p" and "o"'
-  echo '  -c [clean_thumbs]  Trigger thumbnail name cleaning. Requires option "t"'
-  echo '  -h [help]          show this help screen'
+usage() {
+    cat <<EOF
+usage: ${SCRIPT} [-p platform] [-r rom_dir] [-o output_dir] [-t thumbnail_dir] [-g] [-c] [-h]
+  -p platform       vita | windows | android | linux: rom path style used inside the .lpl
+  -r rom_dir        Root directory containing per-system ROM subdirectories
+  -o output_dir     Output directory for .lpl playlist files
+  -t thumbnail_dir  Directory of thumbnail PNGs to clean
+  -g                Generate .lpl playlists (requires -p, -r, -o)
+  -c                Clean illegal characters from thumbnail filenames (requires -t)
+  -h                Show this help
+EOF
 }
 
-function generate_lpls {
-  # Start fresh with a clean output directory.
-  rm -rf ${ODIR}/
-  mkdir -p "${ODIR}"
+platform_select() {
+    case "$1" in
+        vita)
+            ROM_PARENT_DIR="ux0:/data/retroarch/roms"
+            PATH_SEPARATOR="/"
+            ;;
+        windows)
+            ROM_PARENT_DIR='C:\RetroArch-Win64\roms'
+            PATH_SEPARATOR='\'
+            ;;
+        android)
+            ROM_PARENT_DIR="/storage/emulated/0/RetroArch/roms"
+            PATH_SEPARATOR="/"
+            ;;
+        linux)
+            ROM_PARENT_DIR="${HOME}/RetroArch/roms"
+            PATH_SEPARATOR="/"
+            ;;
+        *)
+            echo "Error: valid platforms are vita, windows, android, linux" >&2
+            exit 2
+            ;;
+    esac
+}
 
-  for dir in $(find ${rom_dir}/* -type d); do
-  # Scan sub-directories to generate a unique playlist for each system.
-    playlist_name="${dir#*/}"
-    touch "${ODIR}/${playlist_name}.lpl"
-    cat <<EOF > "${ODIR}/${playlist_name}.lpl"
-{
-  "version": "1.0",
-  "items": [
-EOF
+generate_lpls() {
+    : "${ROM_DIR:?-r rom_dir is required}"
+    : "${ODIR:?-o output_dir is required}"
+    : "${ROM_PARENT_DIR:?-p platform is required}"
 
-    for file in $(ls ${rom_dir}/${playlist_name}/) ; do
-      # Iterate over all rom files and add it to the playlist.
-      rom_label="${file%.*}"
-      cat <<EOF >> "${ODIR}/${playlist_name}.lpl"
-    {
-      "path": "${ROM_PARENT_DIR}${PATH_SEPARATOR}${playlist_name}${PATH_SEPARATOR}${file}",
-      "label": "${rom_label}",
-      "core_path": "DETECT",
-      "core_name": "DETECT",
-      "crc32": "DETECT",
-      "db_name": "${playlist_name}.lpl"
-    },
-EOF
+    rm -rf -- "${ODIR:?}/"
+    mkdir -p "${ODIR}"
+
+    for dir in "${ROM_DIR}"/*/; do
+        [[ -d "$dir" ]] || continue
+        playlist_name="$(basename "$dir")"
+        playlist_file="${ODIR}/${playlist_name}.lpl"
+
+        # Build items array safely with jq, then wrap in the playlist envelope.
+        items="[]"
+        for file in "${ROM_DIR}/${playlist_name}"/*; do
+            [[ -f "$file" ]] || continue
+            rom_name="$(basename "$file")"
+            rom_label="${rom_name%.*}"
+            rom_path="${ROM_PARENT_DIR}${PATH_SEPARATOR}${playlist_name}${PATH_SEPARATOR}${rom_name}"
+
+            items=$(jq --arg path "$rom_path" \
+                       --arg label "$rom_label" \
+                       --arg db "${playlist_name}.lpl" \
+                       '. += [{
+                            path: $path,
+                            label: $label,
+                            core_path: "DETECT",
+                            core_name: "DETECT",
+                            crc32: "DETECT",
+                            db_name: $db
+                        }]' <<<"$items")
+        done
+
+        jq -n --argjson items "$items" '{version: "1.0", items: $items}' > "$playlist_file"
     done
-    # Remove final comma from the json. 
-    # This method is janky but allows permissions to be preserved.
-    sed '$d' "${ODIR}/${playlist_name}.lpl" > ${ODIR}/tmp_file.tmp
-    mv "${ODIR}/tmp_file.tmp" "${ODIR}/${playlist_name}.lpl"
-    cat <<EOF >> "${ODIR}/${playlist_name}.lpl"
-    }
-  ]
-}
-EOF
-
-  done
 }
 
-function clean_thumb_names {
-  # Strips illegal characters from thumbnails by renaming .png files.
+clean_thumb_names() {
+    : "${THUMB_DIR:?-t thumbnail_dir is required}"
 
-  CHARS=('&' '*' '/' ':' '`' '<' '>' '?' '\' '|')
-  
-  for file in ${THUMB_DIR}/* ; do    
-    file=${file#${THUMB_DIR}/} # Substring to remove leading directory
-  
-    if $(grep -q ".png" <<<"${file}"); then
-      thumb="${file}"
-      
-      for illegal_char in "${CHARS[@]}"; do
-        if grep -q "${illegal_char}" <<<"${thumb}"; then
-          thumb_clean="${thumb//${illegal_char}/_}"
-          echo "INFO: Illegal char ${illegal_char} found in $thumb"
-          echo "INFO: Renaming to: $thumb_clean"
-          mv "${THUMB_DIR}/${thumb}" "${THUMB_DIR}/${thumb_clean}"
+    local chars=('&' '*' '/' ':' '`' '<' '>' '?' '\' '|')
+
+    for file in "${THUMB_DIR}"/*.png; do
+        [[ -f "$file" ]] || continue
+        local base clean
+        base="$(basename "$file")"
+        clean="$base"
+        for illegal in "${chars[@]}"; do
+            clean="${clean//${illegal}/_}"
+        done
+        if [[ "$clean" != "$base" ]]; then
+            echo "INFO: Renaming '$base' -> '$clean'"
+            mv -- "${THUMB_DIR}/${base}" "${THUMB_DIR}/${clean}"
         fi
-      done
-    fi
-  done
+    done
 }
 
-function platform_select {
-  if [[ "$1" -eq "vita" ]]; then
-    ROM_PARENT_DIR="ux0:/data/retroarch/roms"
-    PATH_SEPARATOR="/"
-  elsif [[ "$1" -eq "windows" ]]; then
-    ROM_PARENT_DIR="C:\\RetroArch-Win64\\roms\\"
-    PATH_SEPARATOR="\\"
-  else
-    echo "Error: Please select a valid platform: windows or vita"
-  fi
-}
+do_generate=0
+do_clean=0
 
-while getopts p:o:tgch flag; do
-  case "${flag}" in
-    p | --platform            ) platform_select ${OPTARG}
-                                ;;
-    o | --output_dir          ) ODIR=${OPTARG}
-                                ;;
-    t | --thumbnail_dir       ) THUMB_DIR=${OPTARG}
-                                ;;
-    g | --generate_lpls       ) generate_lpls
-                                ;;
-    c | --clean_thumbs        ) clean_thumb_names
-                                ;;
-    h | --help                ) usage
-                                exit 0
-                                ;;
-    *                         ) >&2 echo 'ERROR: Unknown option: "'"${flag}"'"'
-                                usage
-                                exit 9
-                                ;;
+while getopts "p:r:o:t:gch" flag; do
+    case "$flag" in
+        p) platform_select "$OPTARG" ;;
+        r) ROM_DIR="$OPTARG" ;;
+        o) ODIR="$OPTARG" ;;
+        t) THUMB_DIR="$OPTARG" ;;
+        g) do_generate=1 ;;
+        c) do_clean=1 ;;
+        h) usage; exit 0 ;;
+        *) usage; exit 2 ;;
     esac
 done
 
-# chdman createcd -i "Policenauts (Japan) (Disc 2) [En by Slowbeef v1.0].cue" -o "Policenauts - Eng. Patch - Disc 2.chd"
-# xargs -P 10 -n 1 curl -O -L < ../psxurls
+if (( do_generate )); then generate_lpls; fi
+if (( do_clean )); then clean_thumb_names; fi
+if (( ! do_generate && ! do_clean )); then
+    usage
+    exit 2
+fi

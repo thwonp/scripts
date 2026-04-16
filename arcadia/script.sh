@@ -1,3 +1,12 @@
+#!/bin/bash
+#
+# Builds a "rom_basename,proper_name" CSV (mame_fixed.csv) by joining each
+# entry in <SYSTEM>_romlist.txt against the <path>/<name> pairs in the
+# matching <SYSTEM>_gamelist.xml. Used to produce MAME/NEOGEO title
+# lookup tables for frontends that don't consume gamelist.xml directly.
+#
+# Exits non-zero on the first ROM that has no matching <path> entry so
+# missing metadata is caught immediately.
 
 SYSTEMS=('NEOGEO' 'ARCADE')
 

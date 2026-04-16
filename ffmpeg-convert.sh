@@ -1,4 +1,17 @@
 #!/bin/bash
+#
+# In-place transcoder for .mp4 files in the current directory.
+# Re-encodes each video to H.264 at CRF 28 / 30 fps with AAC 96k audio,
+# scaling to fit inside 640x480 while preserving aspect ratio. Intended
+# for trimming the storage size of per-game preview videos used by
+# emulator frontends.
+#
+# Runs one job per CPU core (via xargs -P $(nproc)). Each file is
+# written to temp_<name> first and atomically moved over the original
+# on success. Failures are logged (with an even-dimension fallback
+# retry) to conversion_log.txt; the original file is left untouched.
+
+set -u
 
 log_file="conversion_log.txt"
 : > "$log_file"  # Clear log file

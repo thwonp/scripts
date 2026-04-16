@@ -1,3 +1,19 @@
+"""
+Dawn (LaunchBox-style) gamelist title fixer.
+
+Walks a Games.json file whose top level is {platform_name: {rom_name: {..., "Name": ..., "RomName": ...}}}
+and overwrites each game's "Name" with the proper title found in the matching
+EmulationStation gamelist.xml. ROM filename matching is case-insensitive so a
+gamelist path of "./PacMania.zip" still matches a JSON RomName of "pacmania.zip".
+
+Output is rewritten as compact (single-line) JSON.
+
+Expected layout::
+
+    <platforms_root>/Games.json
+    <platforms_root>/<platform>/gamelist.xml
+"""
+
 import json
 import xml.etree.ElementTree as ET
 import os
@@ -50,8 +66,9 @@ def update_game_names_nested_dict_json(games_json_path, platforms_root_dir):
                 path_element = game_element.find('path')
                 name_element = game_element.find('name')
                 if path_element is not None and name_element is not None:
-                    # Extract filename from the path, e.g., './pacmania.zip' -> 'pacmania.zip'
-                    filename = os.path.basename(path_element.text)
+                    # Extract filename from the path, e.g., './pacmania.zip' -> 'pacmania.zip'.
+                    # Lowercased so RomName lookups are case-insensitive.
+                    filename = os.path.basename(path_element.text).lower()
                     game_title = name_element.text
                     filename_to_title[filename] = game_title
         except ET.ParseError:
@@ -70,10 +87,11 @@ def update_game_names_nested_dict_json(games_json_path, platforms_root_dir):
         if isinstance(platform_games_dict, dict):
             for rom_name_in_json, game_info in platform_games_dict.items():
                 if isinstance(game_info, dict) and "RomName" in game_info and "Name" in game_info:
-                    # The RomName in Games.json includes the extension
-                    # The filename extracted from gamelist.xml also includes the extension
-                    if game_info["RomName"] in filename_to_title:
-                        proper_title = filename_to_title[game_info["RomName"]]
+                    # Both sides include the extension; match case-insensitively
+                    # because LaunchBox casing and gamelist.xml casing often diverge.
+                    rom_key = game_info["RomName"].lower()
+                    if rom_key in filename_to_title:
+                        proper_title = filename_to_title[rom_key]
                         if game_info["Name"] != proper_title:
                             game_info["Name"] = proper_title
                             updated_count += 1
