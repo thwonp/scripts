@@ -1,62 +1,57 @@
 """
-LaunchBox Export Script
+Export LaunchBox game metadata and media into a Batocera-compatible tree.
 
-PURPOSE:
-    Exports game metadata, media (box art, screenshots, videos, etc.), and
-    optionally ROM files from LaunchBox to a Batocera-compatible folder
-    structure with gamelist.xml files.
+For each platform listed in PLATFORMS, parses LaunchBox's platform XML,
+copies the matching box art / screenshot / marquee / video / manual (and
+optionally the ROM) into the output directory under the Batocera folder
+name, renames every media file to the ROM basename so frontends like
+ES-DE pick it up, and writes one gamelist.xml per platform. Marquees are
+trimmed; other images can be converted to PNG. With --recents-only, only
+games whose DateAdded falls within the last --recent-days are exported;
+games missing DateAdded are skipped and counted in the final summary.
 
-REQUIREMENTS:
-    - Python 3.9+ (uses ET.indent and argparse.BooleanOptionalAction)
-    - PIL/Pillow library (install via: pip install Pillow)
-    - LaunchBox installation with game metadata and media
-    - Sufficient disk space in the output directory
-
-CONFIGURATION:
-    Defaults are set as module-level constants in the CONFIGURATION block
-    below, but every option is also a CLI flag. Run with -h to list them.
-
-    - lb_dir: Path to your LaunchBox installation folder
-    - output_dir: Where to export the files
-    - copy_roms: Copy ROM files (can be large!)
-    - copy_media: Copy media files
-    - convert_to_png: Convert JPG images to PNG format
-    - recents_only: Export only recently added games
-    - recent_days: How many days "recent" means
-    - workers: Thread-pool size for media copying
-    - platforms: Dictionary mapping LaunchBox platform names to output
-                 folder names (uncomment the platforms you want to export)
-
-FUNCTIONALITY:
-    - Reads LaunchBox platform XML files to extract game metadata
-    - Copies and organizes media files (box art, screenshots, marquees,
-      videos, manuals)
-    - Renames all media files to match ROM filenames for proper Batocera
-      linking
-    - Converts images to PNG format (optional) and trims marquee whitespace
-    - Generates Batocera-compatible gamelist.xml files for each platform
-    - Can filter to only export recently added games (recents_only mode)
-      * When enabled, only exports games added within the last N days
-      * Useful for incremental updates without re-exporting your entire
-        collection
-      * Games without DateAdded metadata are skipped; the count is
-        reported in the final summary
-
-OUTPUT STRUCTURE:
+Output layout:
     output_dir/
-    ├── platform_name/
-    │   ├── gamelist.xml
-    │   ├── covers/          (box art)
-    │   ├── screenshots/     (gameplay screenshots)
-    │   ├── marquees/        (clear logos/wheels)
-    │   ├── videos/          (video previews)
-    │   └── manuals/         (PDF manuals)
+    └── <platform>/
+        ├── gamelist.xml
+        ├── covers/          (box art)
+        ├── screenshots/     (gameplay screenshots)
+        ├── marquees/        (clear logos/wheels)
+        ├── videos/          (video previews)
+        └── manuals/         (PDF manuals)
 
-USAGE:
-    python launchbox-export.py                      # use defaults
-    python launchbox-export.py --recents-only       # last 7 days
-    python launchbox-export.py --recents-only --recent-days 30
-    python launchbox-export.py --no-convert-to-png --workers 16
+Configuration (each constant below is also a CLI flag of the same name
+in kebab-case, e.g. COPY_ROMS <-> --copy-roms / --no-copy-roms):
+
+    LB_DIR          Root of your LaunchBox installation. Platform XMLs
+                    are read from <LB_DIR>/Data/Platforms/*.xml; media
+                    from <LB_DIR>/images, <LB_DIR>/manuals, <LB_DIR>/videos.
+    OUTPUT_DIR      Destination root. One subdirectory is created per
+                    entry in PLATFORMS and populated with a gamelist.xml
+                    plus media folders.
+    COPY_ROMS       Copy ROM files alongside the metadata. Off by default
+                    because ROMs can be huge; usually you only want the
+                    metadata + art.
+    COPY_MEDIA      Actually write media files to disk. If False,
+                    gamelist.xml still references the expected paths,
+                    which is useful when re-running after media was
+                    already copied on a previous pass.
+    CONVERT_TO_PNG  Convert .jpg/.jpeg sources to .png in the output and
+                    keep any transparency. Marquees always save as PNG
+                    regardless of this flag.
+    RECENTS_ONLY    Only export games whose DateAdded falls within the
+                    last RECENT_DAYS days. Intended for fast incremental
+                    refreshes. Games with missing or unparseable
+                    DateAdded are skipped and counted in the final summary.
+    RECENT_DAYS     Window size in days for RECENTS_ONLY mode.
+    WORKERS         Thread-pool size for per-game processing. Work is
+                    I/O-bound (disk copies + PIL encode), so values above
+                    CPU count can still help until the output disk
+                    saturates.
+    PLATFORMS       {LaunchBox platform name: Batocera output folder}.
+                    Uncomment the entries you want to export.
+
+Requires Python 3.9+ and Pillow. Run with -h for the full CLI flag list.
 """
 
 import argparse
