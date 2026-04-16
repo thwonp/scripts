@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# pack-zips-to-7z.sh — Combine every .zip in a folder into a single .7z.
+# archive-helper.sh — Combine every .zip in a folder into a single .7z.
 #
 # For each *.zip in <directory>: single-file zips are extracted (so the
 # raw file goes into the archive), while multi-file zips are added as-is
@@ -9,7 +9,7 @@
 # Uses -mx=9 -ms=on for maximum solid compression.
 #
 # Usage:
-#   ./pack-zips-to-7z.sh [options] <directory>
+#   ./archive-helper.sh [options] <directory>
 #
 # Options:
 #   (default)    Single-file zips are extracted so the raw file goes into
@@ -76,14 +76,13 @@
 #                mode (7za already parallelizes internally).
 #
 # Example:
-#   ./pack-zips-to-7z.sh "./Nintendo DS unmodified"
+#   ./archive-helper.sh "./Nintendo DS unmodified"
 #   -> produces "./Nintendo DS unmodified.7z"
 #
 # Notes:
 #   - Source ZIPs are preserved unless --delete-originals is set.
 #   - Aborts if the output .7z already exists.
 #   - On interrupt, the partial .7z and staging dir are cleaned up.
-#   - For per-zip 1:1 repacking instead of combining, use repack-zips.sh.
 
 set -euo pipefail
 
