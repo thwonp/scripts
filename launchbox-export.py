@@ -1,7 +1,7 @@
 """
 Export LaunchBox game metadata and media into a Batocera-compatible tree.
 
-Requirements: Python 3.9+ and Pillow (pip install pillow)
+Requirements: Python 3.9+ and Pillow (pip install Pillow)
 
 For each platform listed in PLATFORMS, parses LaunchBox's platform XML,
 copies the matching box art / screenshot / marquee / video / manual (and
