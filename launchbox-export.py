@@ -1,6 +1,8 @@
 """
 Export LaunchBox game metadata and media into a Batocera-compatible tree.
 
+Requirements: Python 3.9+ and Pillow (pip install pillow)
+
 For each platform listed in PLATFORMS, parses LaunchBox's platform XML,
 copies the matching box art / screenshot / marquee / video / manual (and
 optionally the ROM) into the output directory under the Batocera folder
@@ -51,7 +53,7 @@ in kebab-case, e.g. COPY_ROMS <-> --copy-roms / --no-copy-roms):
     PLATFORMS       {LaunchBox platform name: Batocera output folder}.
                     Uncomment the entries you want to export.
 
-Requires Python 3.9+ and Pillow. Run with -h for the full CLI flag list.
+Run with -h for the full CLI flag list.
 """
 
 import argparse
